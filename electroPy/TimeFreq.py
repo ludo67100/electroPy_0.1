@@ -212,7 +212,7 @@ class TimeFreq():
                 self._wf = cache_for_wf
             
             
-            self._map = compute_morlet_scalogram(self.subAnaSig,wf = self._wf )
+            self._map = compute_morlet_scalogram(self.subAnaSig,wf = self._wf,sampling_rate=self.sampling_rate )
             
         
     def plotMap(self, ax,
