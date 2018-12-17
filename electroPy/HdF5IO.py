@@ -42,10 +42,12 @@ class HdF5IO:
         return raw_record
     
     def raw_time(self): #Gets time vector for raw records 
+        
         import numpy as np
         raw_tick = int(self.file['Recording_0']['AnalogStream']['Stream_1']['InfoChannel'][0][8])/1000000.0 #exp6 to pass from us to s
         raw_length = len(self.file['Recording_0']['AnalogStream']['Stream_1']['ChannelData'][0])        
-        raw_time = np.arange(0,raw_length*raw_tick,raw_tick)        
+        raw_time = np.arange(0,raw_length*raw_tick,raw_tick)  
+        
         return raw_time
         
     def raw_sampling_rate(self): #Gets sampling rate
@@ -54,6 +56,64 @@ class HdF5IO:
         
         return 1.0/raw_tick #In Hz
     
+    def raw_view(self, grid_type='2x8',downsample=50, Link_Axis=True):
+        
+        '''
+        grid_type : by default 2x8 display, otherwise fill with shape array
+        
+        downsample : factor for downsampling - high factor will increase speed but reduce quality
+                                             - low factor will reduce speed but increase quality
+                                             
+        Link_Axis : if true, if you resize a subplot, all will be affected       
+        '''
+
+        import pyqtgraph as pg
+        import numpy as np
+        pg.setConfigOption('background','k') #Sets background color
+        pg.setConfigOption('foreground','w') #Sets axis colors
+        
+        x = self.raw_time()
+        y = self.raw_record()
+        
+        win = pg.GraphicsWindow()
+
+        if grid_type=='2x8':
+            grid = np.array([[1,9],
+                             [2,10],
+                             [3,11],
+                             [4,12],
+                             [5,13],
+                             [6,14],
+                             [7,15],
+                             [8,16]])
+
+        def LinkAxis(a):
+            '''
+            Links all views from a list of view to the first 1
+            Both X and Y axis
+            '''    
+            for i in range(len(a)):        
+                if i ==0:
+                    continue
+                a[i].setXLink(a[0])
+                a[i].setYLink(a[0])
+                
+        
+        pen = pg.mkPen(color=(255,140,0)) #Instance for color, rgb. Here should be added linethick and dotted lines
+        
+        Views = [] #To store all supblots
+        
+        for (row,col),ch in np.ndenumerate(grid-1):
+            p = win.addPlot(row=row,col=col)
+            p.setLabel('left','Ch_%s (V)'%(ch+1))
+            p.plot(x,y[ch],downsample=downsample,pen=pen) #or autoDownsample=True
+            Views.append(p)
+                
+        if Link_Axis == True:
+            LinkAxis(Views)
+            
+        return win
+        
     
 #---------Spike filtered recordings--------------------------------------------
     def filt_record(self): #Gets filt Records as matrix (channel,data)
@@ -67,14 +127,16 @@ class HdF5IO:
         
         for i in range(filt.shape[0]):
             filt_record[i,:] = filt[i,:]/filt_conv #From pV to V
-        
+
         return filt_record
     
     def filt_time(self): #Gets time vector for raw records 
         import numpy as np
         filt_tick = int(self.file['Recording_0']['AnalogStream']['Stream_0']['InfoChannel'][0][8])/1000000.0 #exp6 to pass from us to s
         filt_length = len(self.file['Recording_0']['AnalogStream']['Stream_0']['ChannelData'][0])        
-        filt_time = np.arange(0,filt_length*filt_tick,filt_tick)        
+        filt_time = np.arange(0,filt_length*filt_tick,filt_tick)    
+        
+
         return filt_time
         
     def filt_sampling_rate(self):
@@ -82,6 +144,64 @@ class HdF5IO:
         filt_tick = float(self.file['Recording_0']['AnalogStream']['Stream_0']['InfoChannel'][0][8])/1000000.0
         
         return 1.0/filt_tick #In Hz
+    
+    def filt_view(self, grid_type='2x8',downsample=50, Link_Axis=True):
+        
+        '''
+        grid_type : by default 2x8 display, otherwise fill with shape array
+        
+        downsample : factor for downsampling - high factor will increase speed but reduce quality
+                                             - low factor will reduce speed but increase quality
+                                             
+        Link_Axis : if true, if you resize a subplot, all will be affected       
+        '''
+
+        import pyqtgraph as pg
+        import numpy as np
+        pg.setConfigOption('background','k') #Sets background color
+        pg.setConfigOption('foreground','w') #Sets axis colors
+        
+        x = self.filt_time()
+        y = self.filt_record()
+        
+        win = pg.GraphicsWindow()
+
+        if grid_type=='2x8':
+            grid = np.array([[1,9],
+                             [2,10],
+                             [3,11],
+                             [4,12],
+                             [5,13],
+                             [6,14],
+                             [7,15],
+                             [8,16]])
+
+        def LinkAxis(a):
+            '''
+            Links all views from a list of view to the first 1
+            Both X and Y axis
+            '''    
+            for i in range(len(a)):        
+                if i ==0:
+                    continue
+                a[i].setXLink(a[0])
+                a[i].setYLink(a[0])
+                
+        
+        pen = pg.mkPen(color=(255,140,0)) #Instance for color, rgb. Here should be added linethick and dotted lines
+        
+        Views = [] #To store all supblots
+        
+        for (row,col),ch in np.ndenumerate(grid-1):
+            p = win.addPlot(row=row,col=col)
+            p.setLabel('left','Ch_%s (V)'%(ch+1))
+            p.plot(x,y[ch],downsample=downsample,pen=pen) #or autoDownsample=True
+            Views.append(p)
+                
+        if Link_Axis == True:
+            LinkAxis(Views)
+            
+        return win
 
     
 #---------LFP filtered recordings--------------------------------------------
@@ -112,7 +232,63 @@ class HdF5IO:
         
         return 1.0/lfp_tick #In Hz
         
+    def LFP_view(self, grid_type='2x8',downsample=50, Link_Axis=True):
         
+        '''
+        grid_type : by default 2x8 display, otherwise fill with shape array
+        
+        downsample : factor for downsampling - high factor will increase speed but reduce quality
+                                             - low factor will reduce speed but increase quality
+                                             
+        Link_Axis : if true, if you resize a subplot, all will be affected       
+        '''
+
+        import pyqtgraph as pg
+        import numpy as np
+        pg.setConfigOption('background','k') #Sets background color
+        pg.setConfigOption('foreground','w') #Sets axis colors
+        
+        x = self.LFP_time()
+        y = self.LFP_record()
+        
+        win = pg.GraphicsWindow()
+
+        if grid_type=='2x8':
+            grid = np.array([[1,9],
+                             [2,10],
+                             [3,11],
+                             [4,12],
+                             [5,13],
+                             [6,14],
+                             [7,15],
+                             [8,16]])
+
+        def LinkAxis(a):
+            '''
+            Links all views from a list of view to the first 1
+            Both X and Y axis
+            '''    
+            for i in range(len(a)):        
+                if i ==0:
+                    continue
+                a[i].setXLink(a[0])
+                a[i].setYLink(a[0])
+                
+        
+        pen = pg.mkPen(color=(255,140,0)) #Instance for color, rgb. Here should be added linethick and dotted lines
+        
+        Views = [] #To store all supblots
+        
+        for (row,col),ch in np.ndenumerate(grid-1):
+            p = win.addPlot(row=row,col=col)
+            p.setLabel('left','Ch_%s (V)'%(ch+1))
+            p.plot(x,y[ch],downsample=downsample,pen=pen) #or autoDownsample=True
+            Views.append(p)
+                
+        if Link_Axis == True:
+            LinkAxis(Views)
+            
+        return win        
 
 
 ##----------------TRIAL---------------------------------------------
