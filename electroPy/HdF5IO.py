@@ -112,6 +112,8 @@ class HdF5IO:
         if Link_Axis == True:
             LinkAxis(Views)
             
+        win.showMaximized() #Takes full display, mandatory for saving 
+            
         return win
         
     
@@ -200,6 +202,9 @@ class HdF5IO:
                 
         if Link_Axis == True:
             LinkAxis(Views)
+
+        win.showMaximized() #Takes full display, mandatory for saving 
+
             
         return win
 
@@ -287,6 +292,9 @@ class HdF5IO:
                 
         if Link_Axis == True:
             LinkAxis(Views)
+            
+        win.showMaximized() #Takes full display, mandatory for saving 
+
             
         return win        
 
